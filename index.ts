@@ -76,13 +76,13 @@ abstract class RPGCharacter {
     race: Race
   ) {
     if (race === "Archer") {
-      new Archer(name);
+      return new Archer(name);
     } else if (race === "Knight") {
-      new Knight(name);
+      return new Knight(name);
     } else if (race === "Ogre") {
-      new Ogre(name);
+      return new Ogre(name);
     } else if (race === "Peon") {
-      new Peon(name);
+      return new Peon(name);
     }
   }
 
@@ -201,5 +201,7 @@ const newCharRaceInp = document.getElementById('char-race')! as HTMLInputElement
 characterCreationButton!.addEventListener('click',()=>{
     const newCharName = newCharNameInp.value
     const newCharRace = newCharRaceInp.value as Race
-    RPGCharacter.createRPGCharacter(newCharName, newCharRace)
+    const newChar = RPGCharacter.createRPGCharacter(newCharName, newCharRace) as RPGCharacter
+    newChar.updateInventory()
+    newChar.showItems()
 })
