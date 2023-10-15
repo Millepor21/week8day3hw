@@ -1,101 +1,205 @@
-import { v4 } from 'uuid';
+import { v4 } from "uuid";
 
-type InventoryItem = {
-    id: string
-    name: string
-    description: string
-    value: number
+interface IAttack {
+  attack(): void;
 }
 
-interface Armor extends InventoryItem {
-    defense: number
+interface IDefence {
+  defend(): void;
 }
 
-interface Weapon extends InventoryItem {
-    damage: number
+class ClubAttack implements IAttack {
+  attack(): void {
+    console.log("Attacking with a Club");
+  }
 }
 
-type RPGCharacter = {
-    id: string
-    name: string
-    archtype: string
-    fightingStyle: "ranged" | "melee"
-    inventory: InventoryItem[]
+class BowAttack implements IAttack {
+  attack(): void {
+    console.log("Attacking with a Bow");
+  }
 }
 
-function createCharacter(name: string, archtype: string, fightingStyle: "ranged"|"melee"):RPGCharacter{
-    const uuid = v4();
-    return {id: uuid,name,archtype,fightingStyle,inventory:[]}
+class SwordAttack implements IAttack {
+  attack(): void {
+    console.log("Attacking with a Sword");
+  }
 }
 
-function createInventoryItem(name: string, description: string, value: number, damage: number = 0, defense: number = 0):Weapon|Armor{
-    const uuid = v4();
-    let parameterDef = 0
-    let parameterDam = 0
-    if(damage > 1){
-        parameterDam = damage
-    } else if (defense > 1){
-        parameterDef = defense
-    } else {
-        console.log('Error, either a defense or damage value is required');
+class TunicDefence implements IDefence {
+  defend(): void {
+    console.log("Defending with a Tunic");
+  }
+}
+
+class ArmorDefence implements IDefence {
+  defend(): void {
+    console.log("Defending with Armor");
+  }
+}
+
+class ShieldDefence implements IDefence {
+  defend(): void {
+    console.log("Defending with a Shield");
+  }
+}
+
+type Race = "Ogre" | "Peon" | "Knight" | "Archer"
+
+abstract class RPGCharacter {
+  constructor(
+    private attackMechanic: IAttack,
+    private defenceMechanic: IDefence,
+    public inventory: InventoryItem[] = []
+  ) {}
+
+  attack(): void {
+    this.attackMechanic.attack();
+  }
+
+  defend(): void {
+    this.defenceMechanic.defend();
+  }
+
+  collectGold(): void {
+    console.log("Collecting gold");
+  }
+
+  changeStyle(attackMechanic: IAttack, defenceMechanic: IDefence): void {
+    this.attackMechanic = attackMechanic;
+    this.defenceMechanic = defenceMechanic;
+    console.log("Changed Fighting Style");
+  }
+
+  static createRPGCharacter(
+    name: string,
+    race: Race
+  ) {
+    if (race === "Archer") {
+      new Archer(name);
+    } else if (race === "Knight") {
+      new Knight(name);
+    } else if (race === "Ogre") {
+      new Ogre(name);
+    } else if (race === "Peon") {
+      new Peon(name);
     }
-    return {id: uuid, name: name, description: description, value: value,defense: parameterDef,damage: parameterDam}
-}
+  }
 
-function addToInventory(anItem: Weapon|Armor, aCharacter: RPGCharacter):void{
-    aCharacter.inventory.push(anItem)
-}
-
-function removeFromInventory(anItem: InventoryItem,aCharacter: RPGCharacter):void{
-    aCharacter.inventory = aCharacter.inventory.filter(object => object !== anItem)
-}
-
-function removeQuantityFromInventory(anItem: InventoryItem,aCharacter: RPGCharacter,quantity: number):void{
-    for(let i = 0; i < quantity; i ++){
-        const index = aCharacter.inventory.indexOf(anItem)
-        aCharacter.inventory.splice(index,1)
+  inventoryHTMLElement() {
+    const container = document.getElementById("inventory-container")!;
+    for (const item of this.inventory) {
+      const inventoryItem = document.createElement("div");
+      container.appendChild(inventoryItem);
+      inventoryItem.id = item.id;
+      inventoryItem.className = item.name;
+      const name = document.createElement("h2");
+      inventoryItem.appendChild(name);
+      name.innerText = item.name;
+      const description = document.createElement("p");
+      inventoryItem.appendChild(description);
+      description.innerText = item.description;
+      const value = document.createElement("p");
+      inventoryItem.appendChild(value);
+      value.innerText = item.value.toString();
+      const allButton = document.createElement("button");
+      inventoryItem.appendChild(allButton);
+      allButton.innerText = "Delete All";
+      allButton.id = item.name;
+      allButton.addEventListener("click", () => {
+        const parentElementClassName = allButton.parentElement!.className;
+        const elementsToDelete = container.getElementsByClassName(
+          parentElementClassName
+        );
+        for (const element of elementsToDelete) {
+          element.remove();
+        }
+      });
+      const oneButton = document.createElement("button");
+      inventoryItem.appendChild(oneButton);
+      oneButton.innerText = "Delete One";
+      oneButton.id = item.id;
+      oneButton.addEventListener("click", () => {
+        oneButton.parentElement!.remove();
+      });
     }
-}
+  }
 
-function inventoryValue(aCharacter: RPGCharacter):number{
-    let totalValue = 0
-    for(const item of aCharacter.inventory){
-        totalValue += item.value
+  showItems() {
+    const container = document.getElementById("shop")!;
+    for (const item of this.inventory) {
+      const inventoryItem = document.createElement("div");
+      container.appendChild(inventoryItem);
+      inventoryItem.id = item.id;
+      inventoryItem.className = item.name;
+      const name = document.createElement("h2");
+      inventoryItem.appendChild(name);
+      name.innerText = item.name;
+      const description = document.createElement("p");
+      inventoryItem.appendChild(description);
+      description.innerText = item.description;
+      const value = document.createElement("p");
+      inventoryItem.appendChild(value);
+      value.innerText = item.value.toString();
     }
-    return totalValue
+  }
+
+  updateInventory() {
+    if (this.inventory.length === 0) {
+      window.alert("No items in Inventory");
+      RPGCharacter.createRPGItems()
+    } else this.inventoryHTMLElement();
+  }
+
+  static createRPGItems(): InventoryItem[] {
+    const newItem = new InventoryItem("gold","A shiny round coin with a strange glow",1)
+    return [newItem]
+  }
 }
 
-function printInventory(aCharacter: RPGCharacter):void{
-    console.table(aCharacter.inventory)
+class Ogre extends RPGCharacter {
+  constructor(private name: string) {
+    super(new ClubAttack(), new ShieldDefence());
+    this.name = name;
+  }
+}
+class Knight extends RPGCharacter {
+  constructor(private name: string) {
+    super(new SwordAttack(), new ArmorDefence());
+    this.name = name;
+  }
+}
+class Peon extends RPGCharacter {
+  constructor(private name: string) {
+    super(new ClubAttack(), new ShieldDefence());
+    this.name = name;
+  }
+}
+class Archer extends RPGCharacter {
+  constructor(private name: string) {
+    super(new BowAttack(), new TunicDefence());
+    this.name = name;
+  }
 }
 
-const char1 = createCharacter("Harn","light","melee")
-const Sword = createInventoryItem("Lerth","A magical sword of the ogre tribe that goes to the strongest of the current generation",20,12,0)
-const Bow = createInventoryItem("Storm","A legendary bow with the force of the wind behind each shot",10,15,0)
-const Club = createInventoryItem("Bat","Hits harder than usual",10,8,0)
-const Armor = createInventoryItem("Iron Hold","Unusually large Armor created by...for Harn the strongest of the current generation",30,0,40)
+class InventoryItem {
+  id: string;
+  name: string;
+  description: string;
+  value: number;
+  constructor(name: string, description: string, value: number) {
+    this.id = v4();
+    this.name = name;
+    this.value = value;
+    this.description = description;
+  }
+}
 
-addToInventory(Sword,char1)
-printInventory(char1)
-inventoryValue(char1)
-
-addToInventory(Bow,char1)
-printInventory(char1)
-inventoryValue(char1)
-
-addToInventory(Club,char1)
-printInventory(char1)
-inventoryValue(char1)
-
-addToInventory(Armor,char1)
-printInventory(char1)
-inventoryValue(char1)
-
-removeFromInventory(Sword,char1)
-printInventory(char1)
-inventoryValue(char1)
-
-addToInventory(Club,char1)
-removeQuantityFromInventory(Club,char1,2)
-printInventory(char1)
-inventoryValue(char1)
+const characterCreationButton = document.getElementById('char-create')!
+const newCharNameInp = document.getElementById('char-name')! as HTMLInputElement
+const newCharRaceInp = document.getElementById('char-race')! as HTMLInputElement
+characterCreationButton!.addEventListener('click',()=>{
+    const newCharName = newCharNameInp.value
+    const newCharRace = newCharRaceInp.value as Race
+    RPGCharacter.createRPGCharacter(newCharName, newCharRace)
+})
