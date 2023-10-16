@@ -1,5 +1,16 @@
 import { v4 } from "uuid";
 
+console.log("hello world");
+type Race = "Ogre"|"Peon"|"Knight"|"Archer"
+const characterCreationButton = document.getElementById('char-create')!
+const newCharNameInp = document.getElementById('char-name')! as HTMLInputElement
+const newCharRaceInp = document.getElementById('char-race')! as HTMLInputElement
+characterCreationButton!.addEventListener('click',()=>{
+    const newCharName = newCharNameInp.value
+    const newCharRace = newCharRaceInp.value as Race
+    RPGCharacter.createRPGCharacter(newCharName, newCharRace)
+})
+
 interface IAttack {
   attack(): void;
 }
@@ -44,8 +55,6 @@ class ShieldDefence implements IDefence {
   }
 }
 
-type Race = "Ogre" | "Peon" | "Knight" | "Archer"
-
 abstract class RPGCharacter {
   constructor(
     private attackMechanic: IAttack,
@@ -73,17 +82,26 @@ abstract class RPGCharacter {
 
   static createRPGCharacter(
     name: string,
-    race: Race
+    race: "Ogre" | "Peon" | "Knight" | "Archer"
   ) {
+    console.log(race);
     if (race === "Archer") {
-      return new Archer(name);
+      const newChar = new Archer(name);
+      newChar.inventoryHTMLElement()
+      newChar.showItems()
     } else if (race === "Knight") {
-      return new Knight(name);
+      const newChar = new Knight(name);
+      newChar.inventoryHTMLElement()
+      newChar.showItems()
     } else if (race === "Ogre") {
-      return new Ogre(name);
+      const newChar = new Ogre(name);
+      newChar.inventoryHTMLElement()
+      newChar.showItems()
     } else if (race === "Peon") {
-      return new Peon(name);
-    }
+      const newChar = new Peon(name);
+      newChar.inventoryHTMLElement()
+      newChar.showItems()
+    } else window.alert("Input invalid")
   }
 
   inventoryHTMLElement() {
@@ -194,14 +212,3 @@ class InventoryItem {
     this.description = description;
   }
 }
-
-const characterCreationButton = document.getElementById('char-create')!
-const newCharNameInp = document.getElementById('char-name')! as HTMLInputElement
-const newCharRaceInp = document.getElementById('char-race')! as HTMLInputElement
-characterCreationButton!.addEventListener('click',()=>{
-    const newCharName = newCharNameInp.value
-    const newCharRace = newCharRaceInp.value as Race
-    const newChar = RPGCharacter.createRPGCharacter(newCharName, newCharRace) as RPGCharacter
-    newChar.updateInventory()
-    newChar.showItems()
-})
