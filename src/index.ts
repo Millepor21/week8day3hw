@@ -1,15 +1,47 @@
 import { v4 } from "uuid";
 
 console.log("hello world");
-type Race = "Ogre"|"Peon"|"Knight"|"Archer"
-const characterCreationButton = document.getElementById('char-create')!
-const newCharNameInp = document.getElementById('char-name')! as HTMLInputElement
-const newCharRaceInp = document.getElementById('char-race')! as HTMLInputElement
-characterCreationButton!.addEventListener('click',()=>{
-    const newCharName = newCharNameInp.value
-    const newCharRace = newCharRaceInp.value as Race
-    RPGCharacter.createRPGCharacter(newCharName, newCharRace)
-})
+
+
+
+
+
+type Race = "Ogre" | "Peon" | "Knight" | "Archer";
+const characterCreationButton = document.getElementById("char-create")!;
+const newCharNameInp = document.getElementById(
+  "char-name"
+)! as HTMLInputElement;
+const newCharRaceInp = document.getElementById(
+  "char-race"
+)! as HTMLInputElement;
+
+
+characterCreationButton.addEventListener("click", (element) => {
+  element.preventDefault();
+  const newCharName = newCharNameInp.value;
+  const newCharRace = newCharRaceInp.value as Race;
+  const newCharacter = RPGCharacter.createRPGCharacter(newCharName, newCharRace);
+  console.log(newCharacter);
+  if(newCharacter) {newCharacter.updateInventory(); console.log(newCharacter.inventory);}
+  
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 interface IAttack {
   attack(): void;
@@ -59,7 +91,7 @@ abstract class RPGCharacter {
   constructor(
     private attackMechanic: IAttack,
     private defenceMechanic: IDefence,
-    public inventory: InventoryItem[] = []
+    public inventory: InventoryItem[] = RPGCharacter.createRPGItems()
   ) {}
 
   attack(): void {
@@ -86,22 +118,58 @@ abstract class RPGCharacter {
   ) {
     console.log(race);
     if (race === "Archer") {
-      const newChar = new Archer(name);
-      newChar.inventoryHTMLElement()
-      newChar.showItems()
+      return new Archer(name);
     } else if (race === "Knight") {
-      const newChar = new Knight(name);
-      newChar.inventoryHTMLElement()
-      newChar.showItems()
+      return new Knight(name);
     } else if (race === "Ogre") {
-      const newChar = new Ogre(name);
-      newChar.inventoryHTMLElement()
-      newChar.showItems()
+      return new Ogre(name);
     } else if (race === "Peon") {
-      const newChar = new Peon(name);
-      newChar.inventoryHTMLElement()
-      newChar.showItems()
-    } else window.alert("Input invalid")
+      return new Peon(name);
+    } else window.alert("Input invalid"); return null
+  }
+
+  inventoryHTMLElementInnerHTML() {
+    const container = document.getElementById("inventory-container")
+    for (const item of this.inventory) {
+        const inventoryItemDiv = document.createElement("div")
+        container!.appendChild(inventoryItemDiv)
+        inventoryItemDiv.id = item.id
+        inventoryItemDiv.className = item.name 
+        inventoryItemDiv.innerHTML = `
+        <h2>${item.name}</h2>
+        <p>${item.description}</p>
+        <p>${item.value.toString()}</p>
+        <button id="${item.name}">Delete All</button>
+        <button id="${item.id}">Delete One</button>
+        `
+    }
+  }
+
+  showItemsInnerHTML() {
+    const container = document.getElementById("shop")
+    for (const item of this.inventory) {
+        const inventoryItemDiv = document.createElement("div")
+        container!.appendChild(inventoryItemDiv)
+        inventoryItemDiv.id = item.id
+        inventoryItemDiv.className = item.name 
+        inventoryItemDiv.innerHTML = `
+        <h2>${item.name}</h2>
+        <p>${item.description}</p>
+        <p>${item.value.toString()}</p>
+        <button id="${item.name}">Delete All</button>
+        <button id="${item.id}">Delete One</button>
+        `
+    }
+  }
+
+  addRemoveElementListeners() {
+    const buttons = document.querySelectorAll(".button");
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        // Do something here.
+      });
+}
   }
 
   inventoryHTMLElement() {
@@ -137,7 +205,8 @@ abstract class RPGCharacter {
       inventoryItem.appendChild(oneButton);
       oneButton.innerText = "Delete One";
       oneButton.id = item.id;
-      oneButton.addEventListener("click", () => {
+      oneButton.addEventListener("click", (element) => {
+        element.preventDefault();
         oneButton.parentElement!.remove();
       });
     }
@@ -165,13 +234,17 @@ abstract class RPGCharacter {
   updateInventory() {
     if (this.inventory.length === 0) {
       window.alert("No items in Inventory");
-      RPGCharacter.createRPGItems()
+      this.inventory = RPGCharacter.createRPGItems();
+      this.inventoryHTMLElement()
     } else this.inventoryHTMLElement();
   }
 
-  static createRPGItems(): InventoryItem[] {
-    const newItem = new InventoryItem("gold","A shiny round coin with a strange glow",1)
-    return [newItem]
+  private static createRPGItems(): InventoryItem[] {
+   return [
+    new InventoryItem("Gold","A golden coin that gives off an otherworldly alure",1),
+    new InventoryItem("Flail","A stick with four spiked ball and chain appendages attatched",7),
+    new InventoryItem("Shield","A common wooden shield with a metal rim and dome in the center",15)
+   ]
   }
 }
 
