@@ -2,7 +2,12 @@ import { v4 } from "uuid";
 
 console.log("hello world");
 
-
+function clearElement(element: HTMLElement) {
+  console.log(element, "clear log");
+  while(element.firstChild){
+    element.removeChild(element.firstChild)
+  }
+}
 
 
 
@@ -18,12 +23,12 @@ const newCharRaceInp = document.getElementById(
 
 characterCreationButton.addEventListener("click", (element) => {
   element.preventDefault();
+  console.log("Hello Sean");
   const newCharName = newCharNameInp.value;
   const newCharRace = newCharRaceInp.value as Race;
   const newCharacter = RPGCharacter.createRPGCharacter(newCharName, newCharRace);
   console.log(newCharacter);
   if(newCharacter) {newCharacter.updateInventory(); console.log(newCharacter.inventory);}
-  
 });
 
 
@@ -125,7 +130,7 @@ abstract class RPGCharacter {
       return new Ogre(name);
     } else if (race === "Peon") {
       return new Peon(name);
-    } else window.alert("Input invalid"); return null
+    } else {window.alert("Input invalid"); return null}
   }
 
   inventoryHTMLElementInnerHTML() {
@@ -167,13 +172,16 @@ abstract class RPGCharacter {
 
     for (const button of buttons) {
       button.addEventListener("click", () => {
-        // Do something here.
+        
       });
 }
   }
 
   inventoryHTMLElement() {
     const container = document.getElementById("inventory-container")!;
+    console.log("Updating inventory");
+    console.log(container);
+    clearElement(container);
     for (const item of this.inventory) {
       const inventoryItem = document.createElement("div");
       container.appendChild(inventoryItem);
